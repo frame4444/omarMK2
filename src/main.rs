@@ -1,8 +1,7 @@
 mod actions;
 mod handlers;
 
-//use actions::send_video;
-use actions::send_video;
+use actions::send_video::send_video;
 use teloxide::prelude::*;
 
 #[tokio::main]
