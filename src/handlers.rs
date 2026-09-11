@@ -1,24 +1,9 @@
+use crate::actions::send_video::*;
 use teloxide::prelude::*;
-use teloxide::types::MessageEntityKind;
 
-pub fn extract_link(msg: &Message) -> Option<String> {
-    let text = msg.text()?;
-    let entities = msg.entities()?;
-
-    for entity in entities {
-        let url = match &entity.kind {
-            MessageEntityKind::Url => text
-                .chars()
-                .skip(entity.offset)
-                .take(entity.length)
-                .collect::<String>(),
-            MessageEntityKind::TextLink { url } => url.to_string(),
-            _ => continue,
-        };
-
-        if url.contains("tiktok.com") || url.contains("instagram.com") || url.contains("x.com") {
-            return Some(url);
-        }
+pub async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
+    if let Some(post) = setup_info(&msg) {
+        send_video(bot, msg, post).await?;
     }
-    None
+    Ok(())
 }

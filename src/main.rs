@@ -1,7 +1,8 @@
 mod actions;
 mod handlers;
+mod models;
 
-use actions::send_video::send_video;
+use handlers::handle_message;
 use teloxide::prelude::*;
 
 #[tokio::main]
@@ -12,5 +13,8 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    teloxide::repl(bot, send_video).await;
+    teloxide::repl(bot, move |bot: Bot, msg: Message| async move {
+        handle_message(bot, msg).await
+    })
+    .await;
 }
