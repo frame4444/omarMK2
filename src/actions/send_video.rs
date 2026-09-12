@@ -2,7 +2,9 @@ use crate::models::post::OmarPost;
 
 use std::process::Stdio;
 use teloxide::prelude::*;
-use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup, InputFile, MessageEntityKind};
+use teloxide::types::{
+    InlineKeyboardButton, InlineKeyboardMarkup, InputFile, MessageEntityKind, ReplyParameters,
+};
 use tokio::process::Command;
 
 pub async fn send_video(bot: Bot, msg: Message, post: OmarPost) -> ResponseResult<()> {
@@ -31,14 +33,19 @@ pub async fn send_video(bot: Bot, msg: Message, post: OmarPost) -> ResponseResul
             bot.send_video(msg.chat.id, InputFile::file(&output_path))
                 .caption(post.user)
                 .reply_markup(post.keyboard)
+                .reply_parameters(post.reply_parameter)
                 .await?;
             let _ = tokio::fs::remove_file(&output_path).await;
+
+            bot.delete_message(msg.chat.id, msg.id).await?;
         }
         _ => {
             log::warn!("download failed for {}", post.url);
-            bot.send_message(msg.chat.id, "Nigga fuck you").await?;
+            bot.send_message(msg.chat.id, "Nigga fuck you")
+                .reply_parameters(post.reply_parameter)
+                .await?;
         }
-    }
+    };
 
     Ok(())
 }
@@ -60,10 +67,13 @@ pub fn setup_info(msg: &Message) -> Option<OmarPost> {
         url::Url::parse(&url).ok()?,
     )]]);
 
+    let reply_parameter = ReplyParameters::new(msg.id);
+
     Some(OmarPost {
         url,
         user,
         keyboard,
+        reply_parameter,
     })
 }
 
