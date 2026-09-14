@@ -4,6 +4,7 @@ mod models;
 
 use handlers::handle_message;
 use teloxide::prelude::*;
+use teloxide::update_listeners::Polling;
 
 #[tokio::main]
 async fn main() {
@@ -16,16 +17,14 @@ async fn main() {
     let bot_name = std::env::var("BOT_NAME").unwrap();
     let bot = Bot::from_env();
 
-    log::info!("{} has awaken!", bot_name);
-    bot.send_message(ChatId(asamblea_chat), format!("{} back online", bot_name))
-        .await
-        .expect("");
-    bot.send_message(ChatId(asamblea_chat), "blackass::video.service back online")
-        .await
-        .expect("");
+    let listener = Polling::builder(bot.clone()).drop_pending_updates().build();
 
-    teloxide::repl(bot, move |bot: Bot, msg: Message| async move {
-        handle_message(bot, msg).await
-    })
+    log::info!("{} has awaken!", bot_name);
+
+    teloxide::repl_with_listener(
+        bot,
+        move |bot: Bot, msg: Message| async move { handle_message(bot, msg).await },
+        listener,
+    )
     .await;
 }
