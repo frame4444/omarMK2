@@ -10,7 +10,7 @@ use teloxide::update_listeners::Polling;
 async fn main() {
     dotenvy::dotenv().ok(); // carga el .env al entorno del proceso
     pretty_env_logger::init();
-    let asamblea_chat: i64 = std::env::var("ASAMBLEA_CHAT_ID")
+    let _asamblea_chat: i64 = std::env::var("ASAMBLEA_CHAT_ID")
         .expect("id not in chat")
         .parse()
         .expect("id not a number");
